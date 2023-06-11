@@ -4,8 +4,12 @@ using UnityEngine;
 
 using UnityEngine.InputSystem;
 
+using UnityEngine.EventSystems;
+
 public class CameraController : MonoBehaviour
 {
+
+    private float speed = 2;
 
     Vector2 move = Vector2.zero;
     Vector2 moveSpline = Vector2.zero;
@@ -20,11 +24,6 @@ public class CameraController : MonoBehaviour
     float zoom = 0;
     float zoomSpline = 0f;
 
-    void Start()
-    {
-
-    }
-
     private void OnMove(InputValue value)
     {
         move = value.Get<Vector2>();
@@ -32,10 +31,12 @@ public class CameraController : MonoBehaviour
 
     private void OnLook(InputValue value)
     {
+        if (EventSystem.current.IsPointerOverGameObject()) return;
+
         Vector3 look = value.Get<Vector2>();
 
         look.y = -look.y;
-
+        
         rotation += look*0.1f;
     }
 
@@ -51,18 +52,20 @@ public class CameraController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        zoomSpline = Mathf.Lerp(zoomSpline, zoom, Time.fixedDeltaTime);
+        float delta = Time.unscaledDeltaTime * speed;
 
-        moveSpline = Vector2.Lerp(moveSpline, move, Time.fixedDeltaTime);
-        flySpline = Mathf.Lerp(flySpline, fly, Time.fixedDeltaTime);
+        zoomSpline = Mathf.Lerp(zoomSpline, zoom, delta);
 
-        Vector3 shift = new Vector3(moveSpline.x, 0, moveSpline.y) * moveSpeed * Time.fixedDeltaTime;
-        transform.position += transform.TransformDirection(shift) + (new Vector3(0f, flySpline, 0f) * moveSpeed * Time.fixedDeltaTime);
+        moveSpline = Vector2.Lerp(moveSpline, move, delta);
+        flySpline = Mathf.Lerp(flySpline, fly, delta);
 
-        Camera.main.fieldOfView += zoomSpline*100f * Time.fixedDeltaTime;
+        Vector3 shift = new Vector3(moveSpline.x, 0, moveSpline.y) * moveSpeed * delta;
+        transform.position += transform.TransformDirection(shift) + (new Vector3(0f, flySpline, 0f) * moveSpeed * delta);
+
+        Camera.main.fieldOfView += zoomSpline * 100f * delta;
         Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView, 10f, 90f);
 
-        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(rotation.y, rotation.x, 0), Time.fixedDeltaTime);
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(rotation.y, rotation.x, 0), delta);
     }
 
 }

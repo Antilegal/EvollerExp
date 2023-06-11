@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class UIValue : MonoBehaviour
 {
-
     protected float _value = 0f;
 
     public float Value

@@ -25,8 +25,6 @@ public class Evoller : MonoBehaviour
 
     void Restart()
     {
-        Agent bestAgent = null;
-
         network.Clear();
 
         stage++;
